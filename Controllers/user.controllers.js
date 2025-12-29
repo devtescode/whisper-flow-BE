@@ -143,9 +143,9 @@ module.exports.sendMessage = async (req, res) => {
 
     const message = {
       content: content.trim(),
-      senderName: sender?.name,       // Google name
-      senderEmail: sender?.email,     // Google email
-      senderPicture: sender?.picture, // Google profile picture
+      senderName: sender?.name,      
+      senderEmail: sender?.email,    
+      senderPicture: sender?.picture,
       senderIp: req.ip,
       userAgent: req.headers["user-agent"],
       createdAt: new Date(),
@@ -172,7 +172,6 @@ module.exports.getLinkByPublicId = async (req, res) => {
       return res.status(404).json({ error: "Link not found" });
     }
 
-    // Send only necessary fields to frontend
     return res.status(200).json({
       publicId: link.publicId,
       nickname: link.nickname,
