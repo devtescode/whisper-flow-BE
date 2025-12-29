@@ -42,7 +42,7 @@ module.exports.create = async (req, res) => {
       nickname,
       publicId,
       inboxId,
-      messages: [], // ✅ ensure messages exists
+      messages: [], 
     });
 
     console.log(link, "link create");
