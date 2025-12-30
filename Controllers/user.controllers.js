@@ -170,9 +170,6 @@ module.exports.sendMessage = async (req, res) => {
   }
 };
 
-
-
-
 module.exports.getLinkByPublicId = async (req, res) => {
   try {
     const { publicId } = req.params;
