@@ -2,10 +2,18 @@ const mongoose = require("mongoose");
 
 const linkSchema = new mongoose.Schema(
   {
-    nickname: { type: String, required: true },
+
+    nickname: {
+      type: String,
+      required: true,
+      unique: true, // ✅ DB-level protection
+      trim: true,
+    },
     publicId: { type: String, required: true, unique: true },
     inboxId: { type: String, required: true, unique: true },
-     isActive: {
+    publicId: { type: String, required: true, unique: true },
+    inboxId: { type: String, required: true, unique: true },
+    isActive: {
       type: Boolean,
       default: true, // ✅ Active by default
     },

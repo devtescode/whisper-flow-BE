@@ -25,32 +25,85 @@ module.exports.userwelcome = async (req, res) => {
 
 
 // Helper to generate random ID
-const generateRandomId = () => crypto.randomBytes(6).toString("hex");
+// const generateRandomId = () => crypto.randomBytes(6).toString("hex");
+
+// module.exports.create = async (req, res) => {
+//   try {
+//     const { nickname } = req.body;
+
+//     if (!nickname) {
+//       return res.status(400).json({ error: "Nickname is required" });
+//     }
+
+//     const publicId = generateRandomId();
+//     const inboxId = generateRandomId();
+
+//     const link = new Link({
+//       nickname,
+//       publicId,
+//       inboxId,
+//       messages: [], 
+//     });
+
+//     console.log(link, "link create");
+    
+
+//     await link.save();
+
+//     // ✅ RETURN EVERYTHING THE FRONTEND NEEDS
+//     return res.status(201).json({
+//       _id: link._id,
+//       nickname: link.nickname,
+//       publicId: link.publicId,
+//       inboxId: link.inboxId,
+//       messages: link.messages,
+//       createdAt: link.createdAt,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: "Failed to create anonymous link" });
+//   }
+// };
+
+
+
+const generateRandomId = () =>
+  crypto.randomBytes(6).toString("hex");
 
 module.exports.create = async (req, res) => {
   try {
     const { nickname } = req.body;
 
-    if (!nickname) {
+    if (!nickname?.trim()) {
       return res.status(400).json({ error: "Nickname is required" });
+    }
+
+    // ✅ Normalize nickname (avoid "John" vs "john")
+    const normalizedNickname = nickname.trim();
+
+    // ✅ Check if nickname already exists
+    const existingLink = await Link.findOne({
+      nickname: new RegExp(`^${normalizedNickname}$`, "i"), // case-insensitive
+    });
+
+    if (existingLink) {
+      return res.status(409).json({
+        error: "Nickname already taken. Please choose another one.",
+      });
     }
 
     const publicId = generateRandomId();
     const inboxId = generateRandomId();
 
     const link = new Link({
-      nickname,
+      nickname: normalizedNickname,
       publicId,
       inboxId,
-      messages: [], 
+      messages: [],
     });
-
-    console.log(link, "link create");
-    
 
     await link.save();
 
-    // ✅ RETURN EVERYTHING THE FRONTEND NEEDS
     return res.status(201).json({
       _id: link._id,
       nickname: link.nickname,
@@ -60,11 +113,20 @@ module.exports.create = async (req, res) => {
       createdAt: link.createdAt,
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Failed to create anonymous link" });
+    console.error("Create link error:", err);
+
+    // ✅ Handle duplicate key error (extra safety)
+    if (err.code === 11000) {
+      return res.status(409).json({
+        error: "Nickname already exists. Try a different one.",
+      });
+    }
+
+    return res.status(500).json({
+      error: "Failed to create anonymous link",
+    });
   }
 };
-
 
 
 
@@ -176,7 +238,7 @@ module.exports.getLinkByPublicId = async (req, res) => {
     const link = await Link.findOne({ publicId });
 
     if (!link) {
-      return res.status(404).json({ error: "Link not found" });
+      return res.status(404).json ({ error: "Link not found" });
     }
 
     return res.status(200).json({
