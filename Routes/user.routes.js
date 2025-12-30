@@ -1,6 +1,6 @@
 const express = require("express")
 const { userwelcome, create, sendMessage, getLinkByPublicId, getInbox, getMessages } = require("../Controllers/user.controllers")
-const { checkAdmin, register, login, admingetMessages } = require("../Controllers/admin")
+const { checkAdmin, register, login, admingetMessages, getLinks, toggleLinkStatus } = require("../Controllers/admin")
 const router = express.Router()
 
 
@@ -17,5 +17,7 @@ router.get("/check", checkAdmin)
 router.post("/register", register)
 router.post("/login", login)
 router.get("/admingetMessages",  admingetMessages) 
+router.get("/getLinks", getLinks)
+router.patch("/links/:id/toggle", toggleLinkStatus)
 
 module.exports = router

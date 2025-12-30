@@ -5,6 +5,10 @@ const linkSchema = new mongoose.Schema(
     nickname: { type: String, required: true },
     publicId: { type: String, required: true, unique: true },
     inboxId: { type: String, required: true, unique: true },
+     isActive: {
+      type: Boolean,
+      default: true, // ✅ Active by default
+    },
     messages: [
       {
         content: { type: String, required: true },

@@ -104,3 +104,54 @@ module.exports.admingetMessages = async (req, res) => {
 };
 
 
+module.exports.getLinks = async (req, res) => {
+  try {
+    const links = await Link.find();
+
+    res.json(
+      links.map(link => ({
+        id: link._id.toString(),        
+        nickname: link.nickname,
+        publicId: link.publicId,
+        isActive: link.isActive,
+        createdAt: link.createdAt,
+      }))
+    );
+  } catch (err) {
+    console.error("getLinks error:", err);
+    res.status(500).json({ error: "Failed to fetch links" });
+  }
+};
+
+
+
+module.exports.toggleLinkStatus = async (req, res) => {
+  console.log(req.body);
+  console.log("noticed toggle request");
+  
+  try {
+    const { id } = req.params;
+
+    const link = await Link.findById(id);
+    console.log(link.isActive, "active");
+    
+    if (!link) {
+      return res.status(404).json({ error: "Link not found" });
+    }
+
+    // 🔁 Toggle ONLY when clicked
+    link.isActive = !link.isActive;
+    await link.save();
+
+    res.json({
+      id: link._id.toString(),
+      isActive: link.isActive,
+    });
+  } catch (err) {
+    console.error("toggleLinkStatus error:", err);
+    res.status(500).json({ error: "Failed to toggle status" });
+  }
+};
+
+
+

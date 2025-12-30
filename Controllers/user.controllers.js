@@ -132,19 +132,28 @@ module.exports.getInbox = async (req, res) => {
 module.exports.sendMessage = async (req, res) => {
   try {
     const { publicId } = req.params;
-    const { content, sender } = req.body; // sender comes from frontend
+    const { content, sender } = req.body;
 
     if (!content?.trim()) {
       return res.status(400).json({ error: "Message required" });
     }
 
     const link = await Link.findOne({ publicId });
-    if (!link) return res.status(404).json({ error: "Link not found" });
+    if (!link) {
+      return res.status(404).json({ error: "Link not found" });
+    }
+
+    // 🚫 BLOCKED LINK CHECK
+    if (!link.isActive) {
+      return res.status(403).json({
+        error: "This inbox has been blocked by the Admin",
+      });
+    }
 
     const message = {
       content: content.trim(),
-      senderName: sender?.name,      
-      senderEmail: sender?.email,    
+      senderName: sender?.name,
+      senderEmail: sender?.email,
       senderPicture: sender?.picture,
       senderIp: req.ip,
       userAgent: req.headers["user-agent"],
@@ -156,10 +165,11 @@ module.exports.sendMessage = async (req, res) => {
 
     res.status(201).json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("sendMessage error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 
 
